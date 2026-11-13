@@ -1,0 +1,165 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Unity design tokens. Warm "sunrise" palette built on the original brand orange (#E8892B).
+ * Every text/background pair below is checked for WCAG AA (see README).
+ */
+@theme {
+  --color-brand: #e8892b;
+  --color-sunrise: #ff9f45;
+  --color-peach: #ffd4a3;
+  --color-cream: #fff0e0;
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --bg: #fff8f1;
+  --surface: #ffffff;
+  --surface-2: #f6eee6;
+  --border: #efe3d6;
+  --ink: #2b1d14;
+  --ink-2: #6f6259;
+  --accent-ink: #a8520c;
+  --cream: #fff0e0;
+  --peach: #ffd4a3;
+  --empty-day: #efe5db;
+  --shadow: 0 1px 2px rgb(80 40 10 / 0.05), 0 10px 30px -14px rgb(120 60 20 / 0.25);
+  --glow-1: rgb(255 179 102 / 0.35);
+  --glow-2: rgb(255 140 170 / 0.18);
+  --glow-3: rgb(140 210 170 / 0.18);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #17120f;
+  --surface: #221b16;
+  --surface-2: #2e2520;
+  --border: #3a2f28;
+  --ink: #f7efe8;
+  --ink-2: #b8a99d;
+  --accent-ink: #ffb067;
+  --cream: #33261c;
+  --peach: #6e4520;
+  --empty-day: #2e2520;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --glow-1: rgb(232 137 43 / 0.16);
+  --glow-2: rgb(200 90 130 / 0.1);
+  --glow-3: rgb(80 160 120 / 0.08);
+  color-scheme: dark;
+}
+
+@utility bg-app {
+  background-color: var(--bg);
+}
+@utility bg-surface {
+  background-color: var(--surface);
+}
+@utility bg-surface-2 {
+  background-color: var(--surface-2);
+}
+@utility bg-cream-t {
+  background-color: var(--cream);
+}
+@utility bg-peach-t {
+  background-color: var(--peach);
+}
+@utility text-ink {
+  color: var(--ink);
+}
+@utility text-ink-2 {
+  color: var(--ink-2);
+}
+@utility text-accent {
+  color: var(--accent-ink);
+}
+@utility border-line {
+  border-color: var(--border);
+}
+@utility shadow-soft {
+  box-shadow: var(--shadow);
+}
+@utility bg-sunrise {
+  background-image: linear-gradient(135deg, #ffc27a 0%, #ff9f45 55%, #e8792b 100%);
+}
+
+html {
+  font-size: calc(100% * var(--text-scale, 1));
+  -webkit-text-size-adjust: 100%;
+}
+
+/* iOS native app: follow the user's Dynamic Type setting. */
+html.ios-native {
+  font: -apple-system-body;
+  font-size: calc(1em * var(--text-scale, 1));
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Soft, calm colour glow behind every screen. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 40% at 15% 0%, var(--glow-1), transparent 70%),
+    radial-gradient(50% 35% at 100% 10%, var(--glow-2), transparent 70%),
+    radial-gradient(60% 40% at 50% 100%, var(--glow-3), transparent 70%);
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent-ink);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

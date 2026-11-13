@@ -1,0 +1,153 @@
+rules_version = '2';
+
+// Unity Firestore rules (CLAUDE.md §6). DENY BY DEFAULT.
+// - users/{uid}/** : only the owner, only with a verified email, every write validated.
+// - affirmations, resources : public read, NO client writes (admin SDK / console only).
+// - suggestions : create-only by signed-in verified users, size-limited, rate-limited (1/min).
+// Tests: tests/rules/firestore.rules.test.ts  (npm run test:rules)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() {
+      return request.auth != null;
+    }
+    function verified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+    function isOwner(uid) {
+      return verified() && request.auth.uid == uid;
+    }
+    function data() {
+      return request.resource.data;
+    }
+    function onlyKeys(allowed) {
+      return data().keys().hasOnly(allowed);
+    }
+    function hasKeys(required) {
+      return data().keys().hasAll(required);
+    }
+    function str(v, maxLen) {
+      return v is string && v.size() <= maxLen;
+    }
+    function epochMs(v) {
+      // between 2024-01-01 and 2100-01-01
+      return v is int && v >= 1704067200000 && v < 4102444800000;
+    }
+    function optNum(v, lo, hi) {
+      return v == null || ((v is int || v is float) && v >= lo && v <= hi);
+    }
+    function optInt(v, lo, hi) {
+      return v == null || (v is int && v >= lo && v <= hi);
+    }
+    function isoDate(v) {
+      return v is string && v.matches('^20[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$');
+    }
+    function cipher(v, maxLen) {
+      // empty, or "v1:<base64>" — plaintext can never be stored
+      return v is string && v.size() <= maxLen && (v == '' || v.matches('^v1:[A-Za-z0-9+/]+=*$'));
+    }
+
+    // ---------- user profile ----------
+    function validUserDoc() {
+      return onlyKeys(['nickname', 'createdAt', 'settings', 'encKeyCheck', 'keyWrap'])
+        && hasKeys(['nickname', 'createdAt', 'settings', 'encKeyCheck', 'keyWrap'])
+        && str(data().nickname, 30)
+        && epochMs(data().createdAt)
+        && data().settings is map
+        && data().settings.keys().hasOnly(['theme', 'textScale', 'reminderHour', 'reminderMinute'])
+        && data().settings.size() <= 4
+        && cipher(data().encKeyCheck, 200) && data().encKeyCheck != ''
+        && data().keyWrap is map
+        && data().keyWrap.keys().hasOnly(['salt', 'wrapped', 'iter'])
+        && str(data().keyWrap.salt, 64)
+        && str(data().keyWrap.wrapped, 128)
+        && data().keyWrap.iter is int && data().keyWrap.iter >= 100000 && data().keyWrap.iter <= 5000000;
+    }
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && validUserDoc();
+      allow update: if isOwner(uid) && validUserDoc() && data().createdAt == resource.data.createdAt;
+
+      // journal entries (one-word + journal text are ciphertext only)
+      match /entries/{entryId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && entryId.size() <= 64
+          && onlyKeys(['date', 'mood', 'stars', 'oneWordEnc', 'journalEnc', 'createdAt', 'updatedAt'])
+          && hasKeys(['date', 'mood', 'stars', 'oneWordEnc', 'journalEnc', 'createdAt', 'updatedAt'])
+          && isoDate(data().date)
+          && data().mood in ['great', 'good', 'okay', 'meh', 'sad', 'angry', 'thoughtful', 'sparkly']
+          && data().stars is int && data().stars >= 0 && data().stars <= 5
+          && cipher(data().oneWordEnc, 400) && data().oneWordEnc != ''
+          && cipher(data().journalEnc, 60000)
+          && epochMs(data().createdAt)
+          && epochMs(data().updatedAt)
+          && data().updatedAt >= data().createdAt;
+      }
+
+      // health logs, one doc per day
+      match /health/{day} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && isoDate(day)
+          && onlyKeys(['sleepHrs', 'waterGlasses', 'exerciseMins', 'steps', 'energy', 'source', 'updatedAt'])
+          && hasKeys(['source', 'updatedAt'])
+          && optNum(data().get('sleepHrs', null), 0, 24)
+          && optInt(data().get('waterGlasses', null), 0, 40)
+          && optInt(data().get('exerciseMins', null), 0, 1440)
+          && optInt(data().get('steps', null), 0, 200000)
+          && optInt(data().get('energy', null), 1, 5)
+          && data().source in ['manual', 'healthkit', 'healthconnect', 'mixed']
+          && epochMs(data().updatedAt);
+      }
+
+      match /favourites/{affId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && affId.size() <= 64 && onlyKeys(['addedAt']) && epochMs(data().addedAt);
+      }
+    }
+
+    // ---------- public content (admin-managed) ----------
+    match /affirmations/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /resources/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ---------- suggestions moderation queue ----------
+    match /rateLimits/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && onlyKeys(['lastSuggestionAt']) && data().lastSuggestionAt == request.time;
+      allow update: if isOwner(uid) && onlyKeys(['lastSuggestionAt'])
+        && data().lastSuggestionAt == request.time
+        && request.time > resource.data.lastSuggestionAt + duration.value(60, 's');
+    }
+
+    match /suggestions/{id} {
+      // Owners may see and delete their own suggestions (status + right to erasure).
+      allow read, delete: if verified() && resource.data.uid == request.auth.uid;
+      allow create: if verified()
+        && onlyKeys(['text', 'category', 'uid', 'createdAt', 'status'])
+        && hasKeys(['text', 'category', 'uid', 'createdAt', 'status'])
+        && data().uid == request.auth.uid
+        && data().text is string && data().text.size() >= 5 && data().text.size() <= 200
+        && data().category in ['confidence', 'school', 'friendships', 'anxiety', 'sport', 'gratitude', 'kindness', 'tough-days', 'rest', 'whanau', 'new-starts']
+        && data().createdAt == request.time
+        && data().status == 'pending'
+        // must be written in the same batch as a fresh rate-limit stamp
+        && getAfter(/databases/$(database)/documents/rateLimits/$(request.auth.uid)).data.lastSuggestionAt == request.time;
+      allow update: if false;
+    }
+
+    // Everything else: denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
