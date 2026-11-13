@@ -126,7 +126,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   )
 }
 
-export function Toggle({ checked, onChange, label, description }: { checked: boolean; onChange: (v: boolean) => void; label: string; description?: string }) {
+export function Toggle({ checked, onChange, label, description, disabled }: { checked: boolean; onChange: (v: boolean) => void; label: string; description?: string; disabled?: boolean }) {
   const id = useId()
   return (
     <div className="flex items-center justify-between gap-4 py-3">
@@ -140,8 +140,9 @@ export function Toggle({ checked, onChange, label, description }: { checked: boo
         id={id}
         role="switch"
         aria-checked={checked}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative h-8 w-14 shrink-0 rounded-full transition ${checked ? 'bg-[var(--accent-ink)]' : 'bg-gray-400 dark:bg-zinc-600'}`}
+        className={`relative h-8 w-14 shrink-0 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${checked ? 'bg-[var(--accent-ink)]' : 'bg-gray-400 dark:bg-zinc-600'}`}
       >
         <span className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow transition ${checked ? 'translate-x-6' : ''}`} />
       </button>

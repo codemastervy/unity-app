@@ -42,6 +42,14 @@ export function SettingsPage() {
         </Field>
       </Card>
 
+      <SectionTitle>Daily check-in reminder</SectionTitle>
+      <Card>
+        <Toggle label="Remind me to check in" description="A gentle daily nudge at a time you choose" checked={false} disabled onChange={() => undefined} />
+        <Notice>
+          <strong>Coming later.</strong> Reminders for the web app need push notifications, which require Firebase’s paid <strong>Blaze</strong> plan. They’ll be switched on once Unity moves to Blaze.
+        </Notice>
+      </Card>
+
       <SectionTitle>Privacy & security</SectionTitle>
       <Card>
         <Toggle

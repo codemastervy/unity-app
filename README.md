@@ -56,6 +56,7 @@ More in [`docs/screenshots/`](docs/screenshots).
 - **Privacy & security**: PIN app lock, export my data (JSON), delete everything, no ads, no analytics, no tracking
 - Optional **account + sync**, with end-to-end encrypted journal fields and a passphrase only you know
 - Dark mode, adjustable text size, works offline, installable
+- **Daily check-in reminders** *(coming later)*: shown in Settings but switched off. Web push notifications need Firebase's paid **Blaze** plan, so this switches on once Unity moves to Blaze.
 
 ## Get it running (one command)
 
