@@ -2,8 +2,6 @@
 import { getAll, wipeAll, type StoredFavourite, type StoredHealth } from './db'
 import { getEntry, listEntries } from './entries'
 import { deleteDataKey } from './keystore'
-import { cancelDailyReminder } from './notifications'
-import { isNative } from './platform'
 import { loadSettings } from './settings'
 
 export async function buildExport() {
@@ -21,7 +19,7 @@ export async function buildExport() {
     exportedAt: new Date().toISOString(),
     note: 'Photos stay on your device and are not included in this export.',
     profile: { nickname: settings.nickname },
-    settings: { theme: settings.theme, textScale: settings.textScale, reminder: settings.reminder },
+    settings: { theme: settings.theme, textScale: settings.textScale },
     entries,
     health,
     favouriteAffirmations: favourites,
@@ -31,13 +29,6 @@ export async function buildExport() {
 export async function downloadExport(): Promise<void> {
   const data = JSON.stringify(await buildExport(), null, 2)
   const filename = `unity-export-${new Date().toISOString().slice(0, 10)}.json`
-  if (isNative()) {
-    const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem')
-    const { Share } = await import('@capacitor/share')
-    const res = await Filesystem.writeFile({ path: filename, data, directory: Directory.Cache, encoding: Encoding.UTF8 })
-    await Share.share({ title: 'My Unity data', url: res.uri })
-    return
-  }
   const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }))
   const a = document.createElement('a')
   a.href = url
@@ -48,9 +39,8 @@ export async function downloadExport(): Promise<void> {
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
 
-/** Wipes all on-device data, keys and reminders. */
+/** Wipes all on-device data and keys. */
 export async function wipeLocalData(): Promise<void> {
-  await cancelDailyReminder().catch(() => undefined)
   await deleteDataKey().catch(() => undefined)
   await wipeAll()
   try {

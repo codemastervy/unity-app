@@ -92,11 +92,6 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* iOS native app: follow the user's Dynamic Type setting. */
-html.ios-native {
-  font: -apple-system-body;
-  font-size: calc(1em * var(--text-scale, 1));
-}
 
 body {
   margin: 0;

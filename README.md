@@ -13,8 +13,10 @@
   <a href="https://codemastervy.github.io/unity-app/"><strong>▶ Try the live demo</strong></a>
 </p>
 
-> **🚧 Work in progress.** Unity is being built. The final app will be a **Progressive Web App**
-> (installable on iPhone, Android and desktop, works offline) and it lives in this repository.
+> **🚧 Work in progress.** Unity is being built. The final app is a **Progressive Web App (PWA)**,
+> installable from the browser on iPhone, Android and desktop, and it works offline. It lives in this repository.
+> There are no separate App Store / Play Store apps. A PWA is free to publish, updates instantly
+> for everyone, and needs no extra native permissions.
 > The GitHub Pages link above is a **demo** for showing the app off. It runs entirely in your browser,
 > and accounts and cloud sync are **simulated** (see [Demo mode](#demo-mode)).
 
@@ -117,7 +119,7 @@ GitHub Pages on every push to `main`. The build has no secrets and no Firebase c
 ## Tech
 
 React 19 · Vite · TypeScript · Tailwind CSS v4 · vite-plugin-pwa · Web Crypto (AES-GCM, PBKDF2) · IndexedDB ·
-Firebase Auth + Firestore (Spark, optional) · Capacitor plugins prepared for future iOS/Android builds · Lucide icons.
+Firebase Auth + Firestore (Spark, optional) · Lucide icons.
 
 | Path | What |
 |---|---|

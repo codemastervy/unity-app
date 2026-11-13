@@ -9,7 +9,6 @@
  */
 import { constantTimeEqual, hashPin } from './crypto'
 import { firebaseConfigured, getFirebase } from './firebase'
-import { isNative } from './platform'
 
 export interface RawUser {
   uid: string
@@ -56,7 +55,7 @@ const codeError = (code: string) => Object.assign(new Error(code), { code })
 
 const firebaseBackend: Backend = {
   kind: 'firebase',
-  googleSupported: !isNative(),
+  googleSupported: true,
   async currentUser() {
     const { auth } = await getFirebase()
     const u = auth.currentUser
@@ -126,7 +125,6 @@ const firebaseBackend: Backend = {
     if (auth.currentUser) await deleteUser(auth.currentUser)
   },
   async setSessionOnly(on) {
-    if (isNative()) return
     const { auth } = await getFirebase()
     const a = await import('firebase/auth')
     await a.setPersistence(auth, on ? a.browserSessionPersistence : a.browserLocalPersistence)

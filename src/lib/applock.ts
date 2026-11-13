@@ -1,7 +1,6 @@
-/** App lock: PIN (all platforms) + Face ID / fingerprint (native apps). */
+/** App lock: PIN with brute-force protection. */
 import { constantTimeEqual, hashPin } from './crypto'
 import { kvGet, kvSet } from './db'
-import { isNative } from './platform'
 
 export const PIN_RE = /^\d{4,6}$/
 
@@ -35,22 +34,3 @@ export async function recordAttempt(ok: boolean): Promise<void> {
   await kvSet<Attempts>(ATTEMPTS_KEY, { count, until: Date.now() + wait })
 }
 
-export async function biometryAvailable(): Promise<boolean> {
-  if (!isNative()) return false
-  try {
-    const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth')
-    return (await BiometricAuth.checkBiometry()).isAvailable
-  } catch {
-    return false
-  }
-}
-
-export async function biometricUnlock(): Promise<boolean> {
-  try {
-    const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth')
-    await BiometricAuth.authenticate({ reason: 'Unlock Unity', cancelTitle: 'Use PIN', allowDeviceCredential: false, androidTitle: 'Unlock Unity' })
-    return true
-  } catch {
-    return false
-  }
-}

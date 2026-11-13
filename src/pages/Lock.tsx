@@ -1,9 +1,8 @@
-import { Fingerprint } from 'lucide-react'
 import { LogoMark } from '../components/Logo'
 import { useEffect, useState, type FormEvent } from 'react'
 import { HelpButton } from '../components/HelpSheet'
 import { Button, inputClass, Notice, Sheet } from '../components/ui'
-import { biometricUnlock, checkPin, lockoutRemainingMs, recordAttempt } from '../lib/applock'
+import { checkPin, lockoutRemainingMs, recordAttempt } from '../lib/applock'
 import { wipeLocalData } from '../lib/dataExport'
 import { useApp } from '../state/AppContext'
 
@@ -13,10 +12,6 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
   const [err, setErr] = useState('')
   const [wait, setWait] = useState(0)
   const [forgot, setForgot] = useState(false)
-
-  useEffect(() => {
-    if (settings.lock.biometric) biometricUnlock().then((ok) => ok && onUnlock())
-  }, [settings.lock.biometric, onUnlock])
 
   useEffect(() => {
     lockoutRemainingMs().then(setWait)
@@ -71,11 +66,6 @@ export function LockScreen({ onUnlock }: { onUnlock: () => void }) {
             Unlock
           </Button>
         </form>
-        {settings.lock.biometric && (
-          <Button variant="ghost" className="mt-2 flex items-center gap-2" onClick={() => biometricUnlock().then((ok) => ok && onUnlock())}>
-            <Fingerprint size={20} aria-hidden /> Use Face ID / fingerprint
-          </Button>
-        )}
         <Button variant="ghost" className="mt-4 text-sm" onClick={() => setForgot(true)}>
           Forgot PIN?
         </Button>

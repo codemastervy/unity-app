@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Page } from '../components/Layout'
 import { Button, Card, Field, inputClass, Notice, SectionTitle, Sheet, Toggle } from '../components/ui'
 import { deleteRemoteAccount, friendlyAuthError, reauthenticate, setSessionOnly, signOut } from '../lib/account'
-import { biometryAvailable, makePin, PIN_RE } from '../lib/applock'
+import { makePin, PIN_RE } from '../lib/applock'
 import { downloadExport, wipeLocalData } from '../lib/dataExport'
-import { pad } from '../lib/dates'
-import { cancelDailyReminder, remindersSupported, scheduleDailyReminder } from '../lib/notifications'
 import type { TextScale, Theme } from '../lib/settings'
 import { useApp } from '../state/AppContext'
 
@@ -14,25 +12,7 @@ export function SettingsPage() {
   const { settings, updateSettings, user } = useApp()
   const [pinOpen, setPinOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [bio, setBio] = useState(false)
-  const [reminderMsg, setReminderMsg] = useState('')
   const [nick, setNick] = useState(settings.nickname)
-
-  useEffect(() => {
-    biometryAvailable().then(setBio)
-  }, [])
-
-  async function setReminder(enabled: boolean, hour = settings.reminder.hour, minute = settings.reminder.minute) {
-    setReminderMsg('')
-    if (enabled) {
-      const ok = await scheduleDailyReminder(hour, minute)
-      if (!ok) {
-        setReminderMsg('Notifications are turned off for Unity in your phone settings.')
-        enabled = false
-      }
-    } else await cancelDailyReminder()
-    await updateSettings({ reminder: { enabled, hour, minute } })
-  }
 
   return (
     <Page title="Settings" back>
@@ -62,43 +42,16 @@ export function SettingsPage() {
         </Field>
       </Card>
 
-      <SectionTitle>Daily check-in reminder</SectionTitle>
-      <Card>
-        {remindersSupported() ? (
-          <>
-            <Toggle label="Remind me to check in" checked={settings.reminder.enabled} onChange={(v) => void setReminder(v)} />
-            {settings.reminder.enabled && (
-              <Field label="Time" htmlFor="rtime">
-                <input
-                  id="rtime"
-                  type="time"
-                  value={`${pad(settings.reminder.hour)}:${pad(settings.reminder.minute)}`}
-                  onChange={(e) => {
-                    const [h, m] = e.target.value.split(':').map(Number)
-                    if (!Number.isNaN(h)) void setReminder(true, h, m)
-                  }}
-                  className={inputClass}
-                />
-              </Field>
-            )}
-            {reminderMsg && <Notice tone="error">{reminderMsg}</Notice>}
-          </>
-        ) : (
-          <p className="text-ink-2">Reminders work in the Unity iPhone and Android apps.</p>
-        )}
-      </Card>
-
       <SectionTitle>Privacy & security</SectionTitle>
       <Card>
         <Toggle
           label="App lock"
           description="Ask for a PIN when you open Unity"
           checked={settings.lock.enabled}
-          onChange={(v) => (v ? setPinOpen(true) : void updateSettings({ lock: { ...settings.lock, enabled: false, pinHash: '', pinSalt: '', biometric: false } }))}
+          onChange={(v) => (v ? setPinOpen(true) : void updateSettings({ lock: { ...settings.lock, enabled: false, pinHash: '', pinSalt: '' } }))}
         />
         {settings.lock.enabled && (
           <>
-            {bio && <Toggle label="Use Face ID / fingerprint" checked={settings.lock.biometric} onChange={(v) => void updateSettings({ lock: { ...settings.lock, biometric: v } })} />}
             <Field label="Lock again after" htmlFor="lockto">
               <select id="lockto" value={settings.lock.timeoutMins} onChange={(e) => void updateSettings({ lock: { ...settings.lock, timeoutMins: Number(e.target.value) } })} className={inputClass}>
                 <option value={0}>Straight away</option>

@@ -5,7 +5,6 @@
 import type { FirebaseApp } from 'firebase/app'
 import type { Auth } from 'firebase/auth'
 import type { Firestore } from 'firebase/firestore'
-import { isNative } from './platform'
 
 const env = import.meta.env
 
@@ -29,25 +28,11 @@ export interface FirebaseServices {
 let services: Promise<FirebaseServices> | null = null
 
 async function setupAppCheck(app: FirebaseApp) {
-  const { initializeAppCheck, ReCaptchaEnterpriseProvider, CustomProvider } = await import('firebase/app-check')
+  const { initializeAppCheck, ReCaptchaEnterpriseProvider } = await import('firebase/app-check')
   if (env.DEV && env.VITE_APPCHECK_DEBUG_TOKEN) {
     ;(globalThis as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN = env.VITE_APPCHECK_DEBUG_TOKEN
   }
-  if (isNative()) {
-    // Native: App Attest (iOS) / Play Integrity (Android) via the Capacitor plugin,
-    // bridged into the JS SDK so Firestore and Auth requests carry a valid token.
-    const { FirebaseAppCheck } = await import('@capacitor-firebase/app-check')
-    await FirebaseAppCheck.initialize({ isTokenAutoRefreshEnabled: true })
-    initializeAppCheck(app, {
-      provider: new CustomProvider({
-        getToken: async () => {
-          const { token, expireTimeMillis } = await FirebaseAppCheck.getToken({ forceRefresh: false })
-          return { token, expireTimeMillis: expireTimeMillis ?? Date.now() + 30 * 60_000 }
-        },
-      }),
-      isTokenAutoRefreshEnabled: true,
-    })
-  } else if (env.VITE_RECAPTCHA_ENTERPRISE_KEY) {
+  if (env.VITE_RECAPTCHA_ENTERPRISE_KEY) {
     initializeAppCheck(app, { provider: new ReCaptchaEnterpriseProvider(env.VITE_RECAPTCHA_ENTERPRISE_KEY), isTokenAutoRefreshEnabled: true })
   }
 }
@@ -63,9 +48,7 @@ export function getFirebase(): Promise<FirebaseServices> {
       console.warn('App Check could not start')
     }
     const authMod = await import('firebase/auth')
-    const auth = isNative()
-      ? authMod.initializeAuth(app, { persistence: [authMod.indexedDBLocalPersistence] })
-      : authMod.getAuth(app)
+    const auth = authMod.getAuth(app)
     const { initializeFirestore } = await import('firebase/firestore')
     const db = initializeFirestore(app, {})
     return { app, auth, db }

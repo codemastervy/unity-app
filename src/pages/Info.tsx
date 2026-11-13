@@ -35,7 +35,7 @@ export function Privacy() {
 
       <H>Health data</H>
       <P>
-        If you connect Apple Health or Health Connect, Unity only <em>reads</em> steps, sleep and active minutes, and only after you say yes. It’s used to show your summary and is never shared with your school, advertisers or anyone else.
+        If you log sleep, water, exercise, steps or energy, it’s used only to show your summary. It’s never shared with your school, advertisers or anyone else.
       </P>
 
       <H>Where it’s stored</H>

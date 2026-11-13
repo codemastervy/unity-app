@@ -1,26 +1,20 @@
 import { Minus, Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Page } from '../components/Layout'
 import { Button, Card, Notice, SectionTitle } from '../components/ui'
 import type { StoredHealth } from '../lib/db'
 import { formatShort, todayISO } from '../lib/dates'
-import { clampHealth, emptyHealth, HEALTH_LIMITS, nativeHealthAvailable, nativeHealthName, requestNativeHealth, saveHealth, syncNativeHealth, type HealthField } from '../lib/health'
+import { clampHealth, emptyHealth, HEALTH_LIMITS, saveHealth, type HealthField } from '../lib/health'
 import { useApp } from '../state/AppContext'
 
 const FIELDS: HealthField[] = ['sleepHrs', 'waterGlasses', 'exerciseMins', 'steps', 'energy']
 const BIG_STEP: Partial<Record<HealthField, number>> = { steps: 1000, exerciseMins: 15 }
 
 export function Health() {
-  const { health, refreshData, requestSync, settings, updateSettings } = useApp()
+  const { health, refreshData, requestSync } = useApp()
   const today = todayISO()
   const [draft, setDraft] = useState<StoredHealth>(() => health.find((h) => h.date === today) ?? emptyHealth(today))
   const [saved, setSaved] = useState(false)
-  const [native, setNative] = useState(false)
-  const [nativeMsg, setNativeMsg] = useState('')
-
-  useEffect(() => {
-    nativeHealthAvailable().then(setNative)
-  }, [])
 
   const change = (f: HealthField, delta: number) => {
     const l = HEALTH_LIMITS[f]
@@ -34,16 +28,6 @@ export function Health() {
     await refreshData()
     requestSync()
     setSaved(true)
-  }
-
-  async function connect() {
-    setNativeMsg('')
-    const ok = await requestNativeHealth()
-    if (!ok) return setNativeMsg(`No worries — Unity works fine without ${nativeHealthName()}.`)
-    await updateSettings({ healthSync: true })
-    const n = await syncNativeHealth()
-    await refreshData()
-    setNativeMsg(n ? `Synced ${n} days from ${nativeHealthName()}.` : `Connected. Nothing new from ${nativeHealthName()} yet.`)
   }
 
   const history = health.filter((h) => h.date !== today).slice(0, 14)
@@ -83,21 +67,6 @@ export function Health() {
           </div>
         )}
       </Card>
-
-      {native && (
-        <>
-          <SectionTitle>{nativeHealthName()}</SectionTitle>
-          <Card>
-            <p className="text-ink">
-              Unity can <strong>read</strong> your steps, sleep and active minutes from {nativeHealthName()} so you don’t have to type them. It never writes anything, and it’s fine to say no.
-            </p>
-            <Button onClick={() => void connect()} className="mt-3 w-full">
-              {settings.healthSync ? 'Sync now' : `Connect ${nativeHealthName()}`}
-            </Button>
-            {nativeMsg && <p className="mt-2 text-sm text-ink-2">{nativeMsg}</p>}
-          </Card>
-        </>
-      )}
 
       {history.length > 0 && (
         <>

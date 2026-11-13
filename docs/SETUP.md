@@ -30,7 +30,6 @@ Google Cloud console → APIs & Services → Credentials → the "Browser key":
 2. Firebase → App Check → register the web app with reCAPTCHA Enterprise.
 3. Watch the metrics for a day, then click **Enforce** for **Cloud Firestore** and **Authentication**.
 4. Local dev: App Check → Manage debug tokens → add one → `VITE_APPCHECK_DEBUG_TOKEN` in `.env` (dev builds only).
-5. Native (later): register iOS (App Attest) and Android (Play Integrity) apps before enforcing, or the native apps will be blocked.
 
 ## 7. Deploy rules + seed content
 ```bash
