@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "license": "SEE LICENSE IN LICENSE",
   "author": "Isherveer Bhullar",
-  "description": "Unity — a free mental health and wellbeing app for NZ teenagers, made for teenagers by teenagers.",
+  "description": "Unity \u2014 a free mental health and wellbeing app for NZ teenagers, made for teenagers by teenagers.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -50,6 +50,9 @@
     "vitest": "^5.1.0"
   },
   "overrides": {
-    "@grpc/grpc-js": "^1.14.7"
+    "@grpc/grpc-js": "^1.14.7",
+    "minimatch@>=7 <11.0.1": "^11.0.1",
+    "uuid@<11.1.1": "^11.1.1",
+    "glob@>=9 <=14.0.1": "^14.0.2"
   }
 }
