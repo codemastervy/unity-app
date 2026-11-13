@@ -15,7 +15,7 @@ export default tseslint.config(
       'react-hooks/set-state-in-effect': 'off',
       'no-restricted-syntax': [
         'error',
-        { selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']", message: 'Never use dangerouslySetInnerHTML (CLAUDE.md §6).' },
+        { selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']", message: 'Never use dangerouslySetInnerHTML.' },
       ],
       'no-console': ['error', { allow: ['warn'] }],
     },

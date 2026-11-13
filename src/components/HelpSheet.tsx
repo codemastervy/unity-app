@@ -3,7 +3,7 @@ import { HELP_NOW_IDS, smsHref, telHref } from '../data/resources'
 import { useApp } from '../state/AppContext'
 import { Sheet } from './ui'
 
-/** "Need help now?" — reachable from every screen in one tap (CLAUDE.md §5). */
+/** "Need help now?" — reachable from every screen in one tap. */
 export function HelpButton({ compact = false }: { compact?: boolean }) {
   const { setHelpOpen } = useApp()
   return (

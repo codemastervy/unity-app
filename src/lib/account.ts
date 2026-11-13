@@ -1,5 +1,5 @@
 /**
- * Optional accounts (CLAUDE.md §4.8): email + password (with verification) or Google.
+ * Optional accounts: email + password (with verification) or Google.
  * Nickname only — no real name. The journal key is protected by a separate sync passphrase
  * that never leaves the device, so even we can't read journal entries.
  */

@@ -1,5 +1,5 @@
 /**
- * Health tracking (CLAUDE.md §4.7). Manual quick-log. Health data is never shared with schools
+ * Health tracking. Manual quick-log. Health data is never shared with schools
  * or anyone else.
  */
 import { get, getAll, put, type HealthSource, type StoredHealth } from './db'

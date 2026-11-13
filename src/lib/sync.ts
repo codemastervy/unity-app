@@ -1,5 +1,5 @@
 /**
- * Optional account sync (CLAUDE.md §4.8). Last-write-wins by `updatedAt`.
+ * Optional account sync. Last-write-wins by `updatedAt`.
  * Only ciphertext is uploaded for one-word / journal fields. Images never leave the device.
  */
 import { decryptBytes, decryptString, encryptBytes, encryptString } from './crypto'

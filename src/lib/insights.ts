@@ -1,5 +1,5 @@
 /**
- * Gentle insights only (CLAUDE.md §4.3, §5): streaks and patterns, never diagnoses or
+ * Gentle insights only: streaks and patterns, never diagnoses or
  * scores about mental illness.
  */
 import { addDays, lastNDays, todayISO } from './dates'

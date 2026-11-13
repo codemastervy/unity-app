@@ -4,7 +4,7 @@ import { hasLowMoodStreak } from '../lib/insights'
 import { useApp } from '../state/AppContext'
 
 /**
- * Gentle, non-alarming check-in after several low days in a row (CLAUDE.md §5).
+ * Gentle, non-alarming check-in after several low days in a row.
  * Never blocks the user and never contacts anyone.
  */
 export function LowMoodCard() {

@@ -1,5 +1,5 @@
 /**
- * Client-side encryption (CLAUDE.md §6). Journal text, one-word entries and images are
+ * Client-side encryption. Journal text, one-word entries and images are
  * encrypted with AES-GCM-256 using a per-user data key (DEK) BEFORE they are stored or
  * uploaded. For account sync the DEK is wrapped (AES-KW) with a key derived from the user's
  * sync passphrase (PBKDF2-SHA256), so Firestore only ever sees ciphertext.

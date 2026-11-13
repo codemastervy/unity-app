@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Unity Firestore rules (CLAUDE.md §6). DENY BY DEFAULT.
+// Unity Firestore rules. DENY BY DEFAULT.
 // - users/{uid}/** : only the owner, only with a verified email, every write validated.
 // - affirmations, resources : public read, NO client writes (admin SDK / console only).
 // - suggestions : create-only by signed-in verified users, size-limited, rate-limited (1/min).

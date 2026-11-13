@@ -1,5 +1,5 @@
 /**
- * Seed helpline directory (CLAUDE.md §4.6). Checked against the Mental Health Foundation
+ * Seed helpline directory. Checked against the Mental Health Foundation
  * June 2026 helplines list. ⚠️ RE-VERIFY EVERY ENTRY ON THE OFFICIAL SITES BEFORE LAUNCH,
  * then update `lastVerified`. Entries marked `needsVerify` had uncertain details.
  * The live directory lives in Firestore (`resources` collection, admin only) so it can be
@@ -48,7 +48,7 @@ export const SEED_RESOURCES: Resource[] = [
   { id: 'sparx', name: 'SPARX', section: 'apps', description: 'Free online game-based programme for young people feeling down or stressed.', url: 'https://www.sparx.org.nz', lastVerified: V },
 ]
 
-/** Shown in the "Need help now?" sheet (CLAUDE.md §5). */
+/** Shown in the "Need help now?" sheet. */
 export const HELP_NOW_IDS = ['1737', 'lifeline', 'suicide-crisis', 'youthline']
 
 export function telHref(phone: string) {
